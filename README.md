@@ -3,7 +3,18 @@
 Private, offline read-later extension for Chrome, Edge and Firefox. Free, no account, no server.
 Reference codebase for reuse: `../hammock`.
 
-Status: **Week 0 spikes complete**. Product code has not started.
+Repository: <https://github.com/hell-abhi/hammock-reader>
+
+Status: **Week 0 gate passed, phase 1 in progress.** Capture, Rust MHTML decode and
+Offscreen-proof storage work end to end in Chrome.
+
+## Version control
+
+- `main` is protected by hooks: `.githooks/pre-commit` runs the gate without tests;
+  `.githooks/pre-push` runs the full gate, builds `dist/` and runs the e2e save.
+- Enable once per clone: `git config core.hooksPath .githooks`.
+- The gate itself is `cargo xtask check`: fmt, clippy (native and wasm32), tests, a
+  network-call scan, and the frozen-permission check.
 
 ## Read first
 
@@ -26,6 +37,8 @@ Results are written to `docs/SPIKES.md` and `spike/evidence/`. See `spike/README
 
 ## Remaining before phase 1
 
-1. Install Rust (`rustup`, `wasm32-unknown-unknown`, `wasm-bindgen-cli 0.2.129`) and run spike S1.
+1. ~~Install Rust and run spike S1.~~ Done: dom_smoothie builds for wasm32 at 1.0 MB.
 2. Manual spikes S4 (Firefox fetch), S6 (Library folder via Drive for Desktop), S7 on Windows, S8 (uninstall).
-3. Start phase 1: workspace, capture and storage on both browsers.
+3. Phase 1 gate: save a real page in **both** browsers and reopen it offline. Chrome save
+   passes end to end; Firefox capture, the sandboxed reader view, and restore-after-reinstall
+   are still to do.
