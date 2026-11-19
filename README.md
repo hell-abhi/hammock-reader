@@ -5,6 +5,8 @@ Reference codebase for reuse: `../hammock`.
 
 Repository: <https://github.com/hell-abhi/hammock-reader>
 
+License: MIT (see `LICENSE`).
+
 Status: **Week 0 gate passed, phase 1 in progress.** Capture, Rust MHTML decode and
 Offscreen-proof storage work end to end in Chrome.
 
