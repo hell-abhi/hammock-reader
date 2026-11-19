@@ -1,0 +1,5 @@
+#!/bin/sh
+# AGENTS.md gate: fast checks on every commit. Tests run on pre-push.
+set -e
+export PATH="$HOME/.cargo/bin:$PATH"
+cargo xtask check --no-test

@@ -1,0 +1,11 @@
+node_modules/
+target/
+dist/
+*.zip
+
+# Spike browsers, profiles and captured page evidence. Captures can hold page
+# content and third-party identifiers, so only the summary is versioned.
+spike/evidence/
+
+# Local tooling
+.DS_Store

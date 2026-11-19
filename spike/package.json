@@ -1,0 +1,11 @@
+{
+  "name": "hammock-reader-spike",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "spike": "node run.mjs"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}

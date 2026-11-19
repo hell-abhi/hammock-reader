@@ -1,0 +1,9 @@
+// Throwaway extension for the Week 0 spikes. Not product code.
+{
+  "manifest_version": 3,
+  "name": "Hammock Reader spike",
+  "version": "0.0.1",
+  "permissions": ["storage", "pageCapture", "tabs", "offscreen", "scripting"],
+  "host_permissions": ["http://localhost/*", "https://*/*"],
+  "background": { "service_worker": "sw.js", "type": "module" }
+}

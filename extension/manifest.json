@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Hammock Reader",
+  "version": "0.1.0",
+  "description": "Private, offline read-later. Saves the page, not a link.",
+  "minimum_chrome_version": "116",
+  "permissions": ["activeTab", "tabs", "scripting", "storage", "unlimitedStorage", "pageCapture", "offscreen", "downloads"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "action": { "default_popup": "popup.html", "default_title": "Save to Hammock Reader" },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}

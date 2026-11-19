@@ -1,0 +1,50 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: http://localhost:19001/
+Subject: Spike fixture
+Date: Thu, 19 Nov 2026 08:22:11 GMT
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--2rCPKs0UNy4xtW1aQUDBG5GROPTSGWDfqqozJmgMbO----"
+
+
+------MultipartBoundary--2rCPKs0UNy4xtW1aQUDBG5GROPTSGWDfqqozJmgMbO----
+Content-Type: text/html
+Content-ID: <frame-3DD7900EBBA4F97066842CC273A4E180@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: http://localhost:19001/
+
+<!DOCTYPE html><html><head><meta http-equiv=3D"Content-Type" content=3D"tex=
+t/html; charset=3DUTF-8"><link rel=3D"stylesheet" type=3D"text/css" href=3D=
+"cid:css-33e0e7bf-07a6-43d9-8b23-a2a505cc32ae@mhtml.blink" />
+<title>Spike fixture</title>
+
+</head><body>
+<h1>Spike fixture heading</h1>
+<p>Body text for the capture spike. The image below is cross-origin.</p>
+<img src=3D"http://127.0.0.1:19002/cat.png" alt=3D"cat">
+<p id=3D"progress">script-ran</p>
+
+<button>Button</button>
+</body></html>
+------MultipartBoundary--2rCPKs0UNy4xtW1aQUDBG5GROPTSGWDfqqozJmgMbO----
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-Location: http://127.0.0.1:19002/cat.png
+
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmM
+IQAAAABJRU5ErkJggg==
+
+------MultipartBoundary--2rCPKs0UNy4xtW1aQUDBG5GROPTSGWDfqqozJmgMbO----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-33e0e7bf-07a6-43d9-8b23-a2a505cc32ae@mhtml.blink
+
+@charset "utf-8";
+
+body { font-family: Georgia, serif; margin: 2rem; }
+
+h1 { color: rgb(17, 34, 51); }
+
+img { max-width: 320px; }
+------MultipartBoundary--2rCPKs0UNy4xtW1aQUDBG5GROPTSGWDfqqozJmgMbO------

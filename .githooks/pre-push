@@ -1,0 +1,8 @@
+#!/bin/sh
+# AGENTS.md gate: full checks, including tests and the end-to-end save.
+set -e
+export PATH="$HOME/.cargo/bin:$PATH"
+cargo xtask check
+cargo xtask build
+(cd e2e && [ -d node_modules ] || npm install --no-audit --no-fund)
+(cd e2e && node save.mjs)
