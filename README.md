@@ -7,8 +7,9 @@ Repository: <https://github.com/hell-abhi/hammock-reader>
 
 License: MIT (see `LICENSE`).
 
-Status: **Week 0 gate passed, phase 1 in progress.** Capture, Rust MHTML decode and
-Offscreen-proof storage work end to end in Chrome.
+Status: **phase 1**. Chrome save → offline sandboxed reader → library list works end
+to end. Firefox is built and lints clean; its capture path is covered by the
+collector test but has not been smoke-tested in a real Firefox yet.
 
 ## Version control
 
@@ -40,7 +41,20 @@ Results are written to `docs/SPIKES.md` and `spike/evidence/`. See `spike/README
 ## Remaining before phase 1
 
 1. ~~Install Rust and run spike S1.~~ Done: dom_smoothie builds for wasm32 at 1.0 MB.
-2. Manual spikes S4 (Firefox fetch), S6 (Library folder via Drive for Desktop), S7 on Windows, S8 (uninstall).
-3. Phase 1 gate: save a real page in **both** browsers and reopen it offline. Chrome save
-   passes end to end; Firefox capture, the sandboxed reader view, and restore-after-reinstall
-   are still to do.
+2. ~~Chrome save and offline reader.~~ Done: `e2e save` stops the servers before reopening.
+3. Manual spikes S4 (Firefox fetch), S6 (Library folder via Drive for Desktop), S7 on Windows, S8 (uninstall).
+4. Phase 1 gate: a manual save in Firefox. The collector and composer are tested; nothing has
+   run inside Firefox itself yet.
+
+## Run the checks
+
+```sh
+cargo xtask check                  # fmt, clippy, tests, rule scan, permissions
+cargo xtask build                  # Chrome into dist/
+cargo xtask build --browser firefox
+node extension/firefox-capture.test.mjs   # CSS rewrite + inline self-check
+(cd e2e && node save.mjs)          # save, stop servers, reopen offline in the reader
+(cd e2e && node collector.mjs)     # Firefox capture logic in a real page
+```
+
+`git push` runs all of the above through `.githooks/pre-push`.

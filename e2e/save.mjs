@@ -1,5 +1,5 @@
 // End-to-end: load dist/ in headless Chrome, save a page with a cross-origin
-// image, assert the capture is stored and decodes through the Rust worker.
+// image, then reopen it in the reader and check it rendered offline with images.
 // Usage: node e2e/save.mjs [--headed]
 import { createServer } from "node:http";
 import { readFile, mkdtemp, mkdir } from "node:fs/promises";
@@ -18,12 +18,14 @@ const PNG = Buffer.from(
   "base64",
 );
 const PAGE = `<!doctype html><html><head><title>E2E page</title></head>
-<body><h1>Saved heading</h1><p>Body text.</p><img src="http://127.0.0.1:19002/cat.png" alt="cat"></body></html>`;
+<body><h1>Saved heading</h1><p>Body text.</p><img id="cat" src="http://127.0.0.1:19002/cat.png" alt="cat"></body></html>`;
 
 function serve(port, handler) {
   const server = createServer(handler);
   return new Promise((resolve) => server.listen(port, "127.0.0.1", () => resolve(server)));
 }
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function main() {
   await mkdir(dist, { recursive: true });
@@ -57,35 +59,53 @@ async function main() {
       (t) => t.type() === "service_worker" && t.url().startsWith("chrome-extension://"),
       { timeout: 15000 },
     );
-    const worker = await target.worker();
-    worker?.on("console", (message) => console.log("[worker]", message.text()));
     const extensionId = new URL(target.url()).host;
 
     const page = await browser.newPage();
     await page.goto("http://localhost:19001/", { waitUntil: "networkidle2" });
 
     const popup = await browser.newPage();
-    popup.on("console", (message) => console.log("[popup]", message.text()));
     popup.on("pageerror", (error) => console.log("[popup error]", error.message));
     await popup.goto(`chrome-extension://${extensionId}/popup.html`);
-    // The popup runs as a tab here, so it is its own active tab. Send the target
-    // page explicitly: this is the same worker path the real popup uses.
-    const result = await popup.evaluate(() =>
+
+    // The popup is a tab in this run, so it is its own active tab. Send the page URL
+    // explicitly: the worker path and the real popup call are otherwise identical.
+    const saved = await popup.evaluate(() =>
       chrome.runtime.sendMessage({ type: "save", url: "http://localhost:19001/" }));
-    if (result?.error) throw new Error(result.error);
-    const text = `Saved ${result.parts} parts`;
+    if (saved?.error) throw new Error(saved.error);
 
-    // Reading storage proves the capture reached OPFS, not just the UI.
-    const stored = await popup.evaluate(async () => {
-      const root = await navigator.storage.getDirectory();
-      const dir = await root.getDirectoryHandle("articles");
-      const names = [];
-      for await (const name of dir.keys()) names.push(name);
-      return names;
+    const listed = await popup.evaluate(() => chrome.runtime.sendMessage({ type: "list" }));
+    if (listed.articles.length !== 1) throw new Error(`expected one article, got ${listed.articles.length}`);
+    if (listed.articles[0].title !== "E2E page") {
+      throw new Error(`bad title: ${listed.articles[0].title}`);
+    }
+
+    // Original servers go away now: everything below must come from the capture.
+    for (const server of servers) server.close();
+
+    // Reader: rendered sandboxed, no scripts, images present.
+    const reader = await browser.newPage();
+    reader.on("pageerror", (error) => console.log("[reader error]", error.message));
+    await reader.goto(`chrome-extension://${extensionId}/reader.html?id=${saved.id}`);
+    await reader.waitForFunction(() => document.getElementById("page")?.src?.startsWith("blob:"),
+      { timeout: 15000 });
+    await sleep(1500);
+
+    const state = await reader.evaluate(() => {
+      const frame = document.getElementById("page").contentDocument;
+      return {
+        heading: frame?.querySelector("h1")?.textContent || "",
+        images: frame ? [...frame.images].map((img) => ({ ok: img.complete && img.naturalWidth > 0, src: img.src.slice(0, 5) })) : [],
+        scripts: frame?.querySelectorAll("script").length ?? -1,
+      };
     });
-    if (stored.length !== 1) throw new Error(`expected one stored article, got ${stored.length}`);
+    if (state.heading !== "Saved heading") throw new Error(`heading not rendered: ${JSON.stringify(state)}`);
+    if (state.scripts !== 0) throw new Error(`scripts survived: ${state.scripts}`);
+    if (!state.images.length || state.images.some((img) => !img.ok || img.src !== "blob:")) {
+      throw new Error(`images not served from blobs: ${JSON.stringify(state.images)}`);
+    }
 
-    console.log(`e2e save: PASS (${text})`);
+    console.log(`e2e save: PASS (${saved.parts} parts, reader rendered ${state.images.length} image(s), no scripts)`);
   } finally {
     await browser.close();
     for (const server of servers) server.close();

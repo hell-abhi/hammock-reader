@@ -5,7 +5,11 @@ const FIXTURE: &[u8] = include_bytes!("fixtures/fixture.mhtml");
 #[test]
 fn parses_the_captured_fixture() {
     let parts = parse(FIXTURE).expect("fixture must parse");
-    assert_eq!(parts.len(), 4);
+    assert_eq!(
+        parts.len(),
+        3,
+        "html, image and stylesheet; the container is not a part"
+    );
     let html = parts
         .iter()
         .find(|p| p.kind == PartKind::Html)

@@ -1,5 +1,5 @@
 body {
-  width: 280px;
+  width: 300px;
   margin: 0;
   padding: 12px;
   font: 14px system-ui, sans-serif;
@@ -16,4 +16,28 @@ button {
   min-height: 1.4em;
   margin-top: 8px;
   color: #444;
+}
+
+#library {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+#library li {
+  padding: 6px 0;
+  border-top: 1px solid #eee;
+  overflow: hidden;
+}
+
+#library a {
+  display: block;
+  color: #144;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#library small {
+  color: #777;
 }

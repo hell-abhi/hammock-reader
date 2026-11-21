@@ -76,6 +76,10 @@ fn copy_dir(from: &Path, to: &Path) -> Result<(), String> {
         .map_err(|error| error.to_string())?
         .flatten()
     {
+        // Self-checks are development files; they do not ship.
+        if entry.file_name().to_string_lossy().ends_with(".test.mjs") {
+            continue;
+        }
         let target = to.join(entry.file_name());
         if entry.path().is_dir() {
             copy_dir(&entry.path(), &target)?;
@@ -88,18 +92,29 @@ fn copy_dir(from: &Path, to: &Path) -> Result<(), String> {
 
 /// Firefox MV3 uses `background.scripts`. Keep one source manifest and rewrite it.
 fn write_firefox_manifest(dist: &Path) -> Result<(), String> {
+    let json = firefox_manifest_json(dist)?;
+    std::fs::write(
+        dist.join("manifest.json"),
+        serde_json::to_string_pretty(&json).map_err(|error| error.to_string())?,
+    )
+    .map_err(|error| error.to_string())
+}
+
+/// The Chrome manifest with the Firefox swaps applied. Shared with `check`, which
+/// validates the generated file.
+pub fn firefox_manifest_json(dist: &Path) -> Result<serde_json::Value, String> {
     let path = dist.join("manifest.json");
     let text = std::fs::read_to_string(&path).map_err(|error| error.to_string())?;
     let mut json: serde_json::Value =
         serde_json::from_str(&text).map_err(|error| format!("manifest: {error}"))?;
-    json["background"] = serde_json::json!({ "scripts": ["background.js"] });
+    json["background"] = serde_json::json!({ "scripts": ["background.js"], "type": "module" });
+    // Firefox is the only target that needs host access: there is no pageCapture
+    // API there, so the worker fetches the page's resources itself. Chrome's build
+    // keeps no host permissions.
+    json["host_permissions"] = serde_json::json!(["<all_urls>"]);
     json["browser_specific_settings"] =
         serde_json::json!({ "gecko": { "id": "reader@hammock", "strict_min_version": "140.0" } });
-    std::fs::write(
-        &path,
-        serde_json::to_string_pretty(&json).map_err(|error| error.to_string())?,
-    )
-    .map_err(|error| error.to_string())
+    Ok(json)
 }
 
 fn run_cargo(args: &[&str], label: &str) -> Result<(), String> {

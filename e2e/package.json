@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "save": "node save.mjs"
+    "save": "node save.mjs",
+    "collector": "node collector.mjs"
   },
   "dependencies": {
     "puppeteer-core": "^24.0.0"

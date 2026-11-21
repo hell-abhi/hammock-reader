@@ -34,7 +34,7 @@ later, more specific rule wins.
 ## Project rules (Hammock Reader)
 
 - **Read before writing.** `docs/PLAN.md` (scope and phases) and `docs/SPIKES.md` (Week 0 gate). Do not build past an unpassed spike.
-- **No network.** Extension code must never call `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource` or `navigator.sendBeacon`. The only permitted browser API that downloads is the save-time page capture. `spike/` is excluded.
+- **No network, except one place.** Extension code must never call `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource` or `navigator.sendBeacon`, with one exception: `extension/firefox-capture.js` may fetch a page's own resources during a save, because Firefox has no `pageCapture`. It never runs outside a save and never talks to our infrastructure. `spike/` is excluded.
 - **Frozen permissions.** The manifest permission list is fixed: `activeTab`, `tabs`, `scripting`, `storage`, `unlimitedStorage`, `pageCapture`, `offscreen`, `downloads`. `tabs` is needed because the popup must hand the worker the URL of the page it is saving. `optional_host_permissions` for Firefox full-page saving is the only user-granted exception. Changing this list needs the owner's approval in writing.
 - **One writer.** Only the background worker writes stored state. Pages read and send typed messages.
 - **Sanitize untrusted HTML.** Captured pages are untrusted. Render in a sandboxed iframe without `allow-scripts`; never inject captured HTML into an extension page.

@@ -1,8 +1,11 @@
 #!/bin/sh
-# AGENTS.md gate: full checks, including tests and the end-to-end save.
+# AGENTS.md gate: full checks, including tests, the self-checks and the end-to-end
+# save. Chrome only; Firefox is built and linted, its capture logic is covered by
+# e2e/collector.mjs.
 set -e
 export PATH="$HOME/.cargo/bin:$PATH"
 cargo xtask check
+node extension/firefox-capture.test.mjs
 cargo xtask build
 (cd e2e && [ -d node_modules ] || npm install --no-audit --no-fund)
-(cd e2e && node save.mjs)
+(cd e2e && node save.mjs && node collector.mjs)

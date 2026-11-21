@@ -83,6 +83,15 @@ fn boundary_of(text: &str) -> Option<String> {
 fn parse_part(raw: &str) -> Option<MhtmlPart> {
     let head_end = raw.find("\r\n\r\n").or_else(|| raw.find("\n\n"))?;
     let head = &raw[..head_end];
+    // The container itself has a Content-Type but no transfer encoding or id; a real
+    // MIME part always has one of them.
+    if !head
+        .to_ascii_lowercase()
+        .contains("content-transfer-encoding:")
+        && !head.to_ascii_lowercase().contains("content-id:")
+    {
+        return None;
+    }
     let body = &raw[head_end..].trim_start_matches(['\r', '\n']);
     let content_type = header(head, "content-type")?;
     let content_id = header(head, "content-id")
