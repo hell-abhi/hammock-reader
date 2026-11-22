@@ -58,3 +58,49 @@ node extension/firefox-capture.test.mjs   # CSS rewrite + inline self-check
 ```
 
 `git push` runs all of the above through `.githooks/pre-push`.
+
+## Load it in a browser
+
+`dist/` holds one browser at a time. Build for the browser you are about to load.
+
+### Chrome / Edge
+
+```sh
+cargo xtask build
+```
+
+1. Open `chrome://extensions` (or `edge://extensions`) and turn on **Developer mode**.
+2. **Load unpacked** → select this repo's `dist/`.
+3. Open an article, click the Hammock Reader icon, then **Save this page**.
+4. It reports parts and size, and the article appears in the list under the button.
+5. Click the article: the reader opens.
+
+After code changes, run `cargo xtask build` and press **Reload** on the extension card.
+
+### Firefox
+
+```sh
+cargo xtask build --browser firefox
+cd e2e && npx web-ext run --source-dir ../dist
+```
+
+That opens Firefox with a temporary profile, so your normal profile is untouched.
+Alternatively: `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on** →
+pick `dist/manifest.json`.
+
+Firefox installs with a broad host permission. That is deliberate: Firefox has no
+`pageCapture`, so the extension fetches the page's own images and stylesheets at save time.
+
+### Prove it is offline
+
+1. Save an article.
+2. Turn off Wi-Fi (or use DevTools → Network → Offline).
+3. Open the article from the popup. It still renders with images.
+4. In the reader, the frame's console should be silent: scripts are stripped.
+
+### If something looks wrong
+
+- Popup: right-click it → **Inspect** (Chrome), or `about:debugging` → **Inspect** (Firefox).
+- Empty list, save fails: check the worker's console; the `save` message should return an id.
+- Missing images: some pages lazy-load images that were never requested. Turn off Wi-Fi and
+  check whether the article's text and layout are still there.

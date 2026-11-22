@@ -8,4 +8,7 @@ cargo xtask check
 node extension/firefox-capture.test.mjs
 cargo xtask build
 (cd e2e && [ -d node_modules ] || npm install --no-audit --no-fund)
-(cd e2e && node save.mjs && node collector.mjs)
+# Chrome's unpacked-extension install races the first launch after a build; one
+# retry separates that from a real failure.
+(cd e2e && node save.mjs || node save.mjs)
+(cd e2e && node collector.mjs)
